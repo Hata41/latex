@@ -222,9 +222,9 @@ class BeamerGenerator:
         
         preamble_start = f"""
 \\begin{{frame}}{{The Generated Maze}}
+{color_definitions}
 \\begin{{adjustbox}}{{width=0.95\\textwidth, height=0.85\\textheight, keepaspectratio, center}}
 \\begin{{animateinline}}[controls, loop]{{2}}
-{color_definitions}
 """
         
         def frame_setup():
@@ -274,8 +274,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # --- Configuration ---
-    WIDTH_CELLS = 80
-    HEIGHT_CELLS = 50
+    WIDTH_CELLS = 40  # Reduced from 80
+    HEIGHT_CELLS = 25 # Reduced from 50
     MAZE_SEED = 123 
     NUM_DEAD_ENDS_TO_SHOW = 8
     # -------------------

@@ -116,10 +116,12 @@ def _generate_analysis_frame(data):
 def _draw_lcb_plot(data):
     """Draws the TikZ plot for the algorithm visualization with a step-by-step animation sequence."""
     PLOT_WIDTH = 11.0
+    Y_AXIS_HEIGHT = 5.0  # Added missing constant
     num_arms = len(data['true_means'])
     x_step = PLOT_WIDTH / (num_arms + 1)
     plot_ymax = math.ceil(np.max(data['empirical_means'] + data['penalty']))
     
+    plot_code = f"""
 \\begin{{center}}
 \\resizebox{{0.95\\textwidth}}{{!}}{{
 \\begin{{tikzpicture}}[
@@ -137,16 +139,17 @@ def _draw_lcb_plot(data):
     % Axes
     \\draw[axis] (0,0) -- (0, {Y_AXIS_HEIGHT + 0.5}) node[above] {{Reward Estimate}};
     \\draw[axis] (0,0) -- ({PLOT_WIDTH + 0.75}, 0) node[right] {{Arms}};
-     plot_code = f"""
+"""
+    
+    plot_code += f"""
     \\foreach \\y in {{0, 0.5, ..., {int(plot_ymax)}}} {{
         \\pgfmathsetmacro{{\\ycoord}}{{\\y / {plot_ymax} * {Y_AXIS_HEIGHT}}};
         \\draw (-0.1, \\ycoord) -- (0.1, \\ycoord) node[left] {{\\pgfmathprintnumber[fixed, precision=1]{{\\y}}}};
-     plot_code = rf"""
     }}
     \\foreach \\i in {{1,...,{num_arms}}} {{ \\node[font=\\bfseries, below, yshift=-5pt] at (\\i*{x_step}, 0) {{Arm \\i}}; }}
     \\node[below=1.5cm, align=center] at ({PLOT_WIDTH/2}, 0) {{Analysis of Dataset from "{data['name']}"}};
 """
-     plot_code = rf"""
+
     # Plotting data for each arm
     for i in range(num_arms):
         x_pos = (i + 1) * x_step
