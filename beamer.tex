@@ -2,6 +2,8 @@
 \usepackage{tikz}
 \usetikzlibrary{calc}
 \usetikzlibrary{backgrounds}
+\hfuzz=100pt % Ignores horizontal overfull warnings under 100pt
+\vfuzz=100pt % Ignores vertical overfull warnings under 100pt
 \usetikzlibrary{arrows.meta}
 
 
@@ -225,7 +227,7 @@ It measures how well the data distribution $\beta(a)$ covers the optimal arm $a^
 
     % Points and labels
     \filldraw[blue] (0.6,0.6) circle (1.5pt);
-    \node[below left] at (0.6,0.6) {$C^* = 1$ \\ (expert data)};
+    \node[below left, align=center] at (0.6,0.6) {$C^* = 1$ \\ (expert data)};
 
     \filldraw[blue] (2.3,1.0) circle (1.5pt);
     \node[below right] at (2.3,1.0) {mixed data};
@@ -239,7 +241,8 @@ It measures how well the data distribution $\beta(a)$ covers the optimal arm $a^
 
 \vspace{1em}
 \pause
-\textcolor{gray!70}{Smaller $C^*$ means better overlap between $\beta(a)$ and the optimal arm — \\ leading to faster convergence and lower offline regret.}
+\textcolor{gray!70}{Smaller $C^*$ means better overlap between $\beta(a)$ and the optimal arm —} \\
+\textcolor{gray!70}{leading to faster convergence and lower offline regret.}
 \end{frame}
 
 \begin{frame}
