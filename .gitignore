@@ -1,0 +1,31 @@
+# --- Python ---
+.venv/
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+.mypy_cache/
+uv.lock
+
+# --- LaTeX ---
+# Core auxiliary files
+*.aux
+*.log
+*.nav
+*.out
+*.snm
+*.toc
+*.vrb
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.synctex.gz
+*.pdf
+
+# --- OS / IDE ---
+.DS_Store
+.vscode/
+.idea/
+.history/
