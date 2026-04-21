@@ -1,0 +1,22 @@
+\documentclass{beamer}
+
+% Required packages for this animation
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usepackage{animate}
+
+% Tell pgfplots to use modern features (fixes compatibility warnings)
+\pgfplotsset{compat=1.18}
+
+\def\buildmode{animate}
+
+\begin{document}
+
+\begin{frame}[fragile]{LinUCB 3D Confidence Ellipsoid}
+    \centering
+    % Ensure this command exactly matches your Python file name and arguments
+    \input|"python -u linucb_3d_beamer.py --mode animate"
+\end{frame}
+
+\end{document}
+
