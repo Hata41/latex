@@ -1,0 +1,85 @@
+% This is the final, complete version of the graphic.
+% It includes mathematical definitions and clarifies the context of the analysis.
+% The canvas size and drawing order are correct to ensure proper scaling and appearance.
+
+\begin{tikzpicture}[
+    font=\sffamily,
+    ci_bar/.style={line width=12pt, cap=round, blue!60, opacity=0.5},
+    mean_dot/.style={circle, fill=red, inner sep=3.5pt},
+    axis/.style={->, >=Stealth, thick},
+    formula_box/.style={draw, thick, rounded corners, fill=gray!10, align=left}
+]
+
+% --- Bounding Box to guarantee correct size and scaling ---
+\useasboundingbox (1, -2) rectangle (15, 5.2);
+
+
+% --- Subtitle for context ---
+% Appears on slide 2 to explain that this is a per-action analysis.
+\onslide<2->{
+    \node[font=\sffamily\itshape, align=center] at (8, 4.8) {
+        Analysis for a single, fixed action $i$
+    };
+}
+
+% --- SLIDE 1: The Axis ---
+\onslide<1->{
+    \draw[axis] (1.5, 0) -- (1.5, 4.5) node[above, rotate=90, anchor=south] {Reward};
+}
+
+% --- SLIDE 3: The Confidence Interval BAR ---
+% The BAR is drawn on slide 3, in the background.
+\onslide<3->{
+    \draw[ci_bar] (3.5, 2.0) -- (3.5, 4.0);
+}
+
+% --- SLIDE 2: The Empirical Mean (Dot and Text) ---
+% The DOT and its text appear on slide 2, drawn on top of the bar on slide 3.
+\onslide<2->{
+    \node (mean_dot) [mean_dot] at (3.5, 3.0) {};
+    \node (mean_text) [text width=4.5cm, align=left, anchor=west, right=0.5cm of mean_dot] {
+        \textcolor{red}{
+            \textbf{Empirical Mean} $\hat{\mu}_i$ \\
+            \small(Average of observed rewards)
+        }
+    };
+}
+
+% --- SLIDE 3: The Confidence Interval TEXT ---
+% The TEXT for the CI appears on slide 3.
+\onslide<3->{
+    \node [text width=4.5cm, align=left, anchor=north west, below=0.2cm of mean_text] {
+        \textcolor{blue!70!black}{
+             \textbf{Confidence Interval (CI)}: Plausible range for the true mean. Its width shows our uncertainty.
+        }
+    };
+}
+
+% --- MATHEMATICAL FORMULAS (on the right) ---
+
+% --- SLIDE 2: Empirical Mean Formula ---
+\onslide<2->{
+    \node[formula_box, text width=5.5cm] at (12, 3.2) {
+        \textbf{Empirical Mean} (at time $t$) \\[5pt]
+        $\displaystyle \hat{\mu}_i(t) = \frac{1}{n_i(t)} \sum_{s=1}^{t} r_s \cdot \mathbb{I}\{a_s = i\}$
+    };
+}
+
+% --- SLIDE 3: Confidence Interval Formula ---
+\onslide<3->{
+     \node[formula_box, text width=5.5cm] at (12, 0.5) {
+         \textbf{Confidence Interval} (at time $t$) \\[5pt]
+         $\displaystyle \text{CI}_i(t) = \hat{\mu}_i(t) \pm \sqrt{\frac{2 \ln t}{n_i(t)}}$
+     };
+}
+
+% --- Definition of n_i(t) ---
+% Appears with the first formula that uses it (on slide 2).
+\onslide<2->{
+    \node[formula_box, text width=7.5cm] at (12, -1.5) {
+        \textbf{Where}: $n_i(t) = \sum_{s=1}^t \mathbb{I}\{a_s = i\}$ \\[3pt]
+        \small is the number of times action $i$ has been selected up to time $t$.
+    };
+}
+
+\end{tikzpicture}

@@ -1,0 +1,265 @@
+\documentclass[aspectratio=169]{beamer}
+\usepackage{tikz}
+\usetikzlibrary{calc}
+\usetikzlibrary{backgrounds}
+\usetikzlibrary{arrows.meta}
+
+
+% Theme and layout
+\usetheme{Madrid}
+\useoutertheme{infolines} % shows current section in the header and slide numbers in the footer
+\setbeamertemplate{navigation symbols}{} % hide nav icons
+\usepackage{pgfplots} % illustrations
+\pgfplotsset{compat=1.18} % illustrations
+\usetikzlibrary{calc} % tikz calculations
+\usepackage{subcaption} % for subfigures
+\usetikzlibrary{positioning, arrows.meta, calc, decorations.pathmorphing, decorations.markings, shapes.geometric}
+\usetikzlibrary{decorations.pathreplacing} % For braces
+
+\usepackage{amsmath}   % For \text{} in math mode and general math improvements
+\usepackage{amssymb}   % For \mathbb{} (like the E for Expectation)
+\usepackage{xcolor}    % For using \color{red}
+\usetikzlibrary{backgrounds}
+\usepackage{pifont}
+\usepackage{adjustbox}
+
+% Metadata
+\title{Optimistic and Pessimistic Algorithms}
+\author{Sebastian Reboul \hspace{4cm}}
+\date{Séminaire Doctorant TSP}
+
+\tikzset{axis/.style={->, -{Stealth}, line width=0.6pt}}
+
+\begin{document}
+
+\frame{\titlepage}
+
+\begin{frame}
+  \begin{figure}
+    \centering
+    \includegraphics[width=0.6\textwidth]{octopus.png}
+  \end{figure}
+\end{frame}
+
+\input|"./.venv/bin/python -u scripts/mab_problem.py"
+
+
+\begin{frame}{Regret}
+
+\begin{block}{\centering Measuring Learning Performance}
+\begin{itemize}
+    \item Regret quantifies how much reward the learner \textit{misses out on}
+          compared to the best fixed action in hindsight.
+    \item For a horizon $T$:
+    \[
+    R_T = T\mu^* - \mathbb{E}\!\left[\sum_{t=1}^T \mu_{A_t}\right]
+    \]
+    \item $\mu^*$: expected reward of the optimal arm.  
+          $\mu_{A_t}$: expected reward of chosen arm $A_t$.
+    \item Small regret $\Rightarrow$ the learner performs nearly as well as the best arm.
+\end{itemize}
+\end{block}
+
+\vspace{0.6em}
+\pause
+\centering
+\textcolor{gray!70}{Our goal is to make this difference --- the regret --- as small as possible.}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Visuals Explained}
+\begin{figure}
+    \centering
+    \resizebox{0.8\textwidth}{!}{
+        \input{slides/graphics_explained.tex}
+    }
+\end{figure}
+\end{frame}
+
+\input|"./.venv/bin/python -u scripts/eac_beamer.py"
+
+\input|"./.venv/bin/python -u scripts/ae_beamer.py"
+
+\input|"./.venv/bin/python -u scripts/ucb_beamer.py"
+
+\begin{frame}{What is a Regret Bound?}
+
+\begin{block}{\centering Bounding the Learning Loss}
+\begin{itemize}
+    \item A \textbf{regret bound} tells us how large the regret can grow as $T$ increases.
+    \item We say an algorithm satisfies
+    \[
+    R_T \leq C\,f(T)
+    \]
+    for some function $f(T)$ and constant $C>0$.
+    \item This means the algorithm’s regret is \textit{no worse than} the rate $f(T)$.
+    \item Example growth rates:
+    \[
+    \mathcal{O}(\sqrt{T}), \quad \mathcal{O}(T^{2/3}), \quad \mathcal{O}(T)
+    \]
+    \item The smaller the bound, the faster the algorithm learns.
+\end{itemize}
+\end{block}
+
+\vspace{0.5em}
+\pause
+\centering
+\textcolor{gray!70}{A good algorithm keeps $R_T$ \textbf{below} its theoretical upper bound for all $T$.}
+
+\end{frame}
+
+
+\begin{frame}[fragile]
+\frametitle{Theoretical Regret Bounds}
+\begin{figure}
+    \centering
+    \input{slides/regret_comparison.tex}
+\end{figure}
+\end{frame}
+
+% --- Offline Multi-Armed Bandit Setup ---
+\begin{frame}{Offline Multi-Armed Bandit Setup}
+
+\begin{block}{Offline Data Collection}
+\begin{itemize}
+    \item Unlike the online setting, the learner cannot interact with the environment.
+    \item Instead, it receives a fixed dataset
+    \[
+    \mathcal{D} = \{(a_i, r_i)\}_{i=1}^{N}
+    \]
+    collected by a \textbf{behavior policy} $\beta(a)$.
+    \item Each arm $a$ is sampled with probability $\beta(a)$, and rewards $r_i$ are drawn from the true reward distribution of that arm.
+\end{itemize}
+\end{block}
+
+\pause
+\begin{block}{Learning Objective}
+\begin{itemize}
+    \item Using only $\mathcal{D}$, estimate an arm $\hat{a}$ (or policy $\hat{\pi}$) that maximizes expected reward.
+    \item Evaluate performance via the \textbf{offline regret:}
+    \[
+    R_{\text{off}} = \mu^* - \mathbb{E}_{\mathcal{D}}[\,\mu_{\hat{a}}\,].
+    \]
+\end{itemize}
+\end{block}
+
+\end{frame}
+
+
+% --- Comparing Online vs Offline Regret ---
+\begin{frame}{Online vs Offline Regret}
+
+\begin{columns}[T,onlytextwidth]
+\column{0.48\textwidth}
+\begin{block}{\centering Online Bandit}
+\begin{itemize}
+    \item Learner interacts with environment.
+    \item Chooses $A_t$, observes reward $r_t$.
+    \item \textbf{Regret:}
+    \[
+    R_T = T\mu^* - \mathbb{E}\!\left[\sum_{t=1}^T \mu_{A_t}\right]
+    \]
+    \item Goal: \textit{learn while acting.}
+\end{itemize}
+\end{block}
+
+\column{0.48\textwidth}
+\begin{block}{\centering Offline Bandit}
+\begin{itemize}
+    \item Learner receives fixed dataset $\mathcal{D}$.
+    \item No further interaction.
+    \item \textbf{Regret:}
+    \[
+    R_{\text{off}} = \mu^* - \mathbb{E}_{\mathcal{D}}[\,\mu_{\hat{a}}\,]
+    \]
+    \item Goal: \textit{learn from logged data.}
+\end{itemize}
+\end{block}
+\end{columns}
+
+\vspace{0.8em}
+\pause
+\centering
+\textcolor{gray!70}{Both measure performance loss — but online regret arises from exploration, while offline regret stems from limited data coverage.}
+
+\end{frame}
+
+\input|"./.venv/bin/python -u scripts/offline_rl_beamer.py"
+
+% --- The Concentrability Coefficient C* ---
+\begin{frame}{Understanding $C^*$ in Multi-Armed Bandits}
+
+\begin{block}{Definition}
+In offline bandit problems, the dataset is collected under a \textbf{behavior policy} $\beta(a)$,
+while the goal is to identify the \textbf{optimal arm} $a^*$ with mean reward $\mu_{a^*}$.
+The \textbf{concentrability coefficient} $C^*$ is defined as:
+\[
+\frac{1}{\beta(a^*)} \le C^*
+\]
+It measures how well the data distribution $\beta(a)$ covers the optimal arm $a^*$.
+\end{block}
+
+\pause
+\begin{block}{Intuition}
+\begin{itemize}
+    \item $C^* = 1$ : dataset perfectly matches the optimal arm (expert data).
+    \item $C^* > 1$ : suboptimal arms appear more often — weaker coverage of $a^*$.
+    \item Larger $C^*$ $\Rightarrow$ greater distribution mismatch, harder learning.
+\end{itemize}
+\end{block}
+
+\end{frame}
+
+% --- Visualizing the Role of C* ---
+\begin{frame}{Effect of $C^*$ on Offline Learning}
+
+\centering
+\begin{tikzpicture}[scale=1.2, every node/.style={font=\small}]
+    % Axes
+    \draw[axis] (0,0) -- (5.4,0) node[right] {$C^*$ (data mismatch)};
+    \draw[axis] (0,0) -- (0,2.8) node[above] {expected offline regret};
+
+    % Curve
+    \draw[thick, blue] (0.5,0.5) .. controls (2,0.9) and (4,1.7) .. (5,2.3);
+    \node[blue, right] at (5,2.3) {weaker coverage $\Rightarrow$ higher regret};
+
+    % Points and labels
+    \filldraw[blue] (0.6,0.6) circle (1.5pt);
+    \node[below left] at (0.6,0.6) {$C^* = 1$ \\ (expert data)};
+
+    \filldraw[blue] (2.3,1.0) circle (1.5pt);
+    \node[below right] at (2.3,1.0) {mixed data};
+
+    \filldraw[blue] (4.8,2.2) circle (1.5pt);
+    \node[above left] at (4.8,2.2) {low coverage};
+
+    % Annotation
+    \node[gray] at (2.7,-0.5) {offline learning becomes harder as $C^*$ grows};
+\end{tikzpicture}
+
+\vspace{1em}
+\pause
+\textcolor{gray!70}{Smaller $C^*$ means better overlap between $\beta(a)$ and the optimal arm — \\ leading to faster convergence and lower offline regret.}
+\end{frame}
+
+\begin{frame}
+  \begin{figure}
+    \centering
+    \includegraphics[width=0.5\textwidth]{mabs.png}
+  \end{figure}
+\end{frame}
+
+\input{animations/rl_as_stacked_mab.tex}
+
+\begin{frame}
+  \begin{figure}
+    \centering
+    \includegraphics[width=0.8\textwidth]{bridging.png}
+  \end{figure}
+\end{frame}
+
+\input|"./.venv/bin/python -u scripts/maze_solver_beamer.py"
+
+
+
+\end{document}
