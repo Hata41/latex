@@ -1,5 +1,6 @@
 import numpy as np
 import math
+import argparse
 
 def run_offline_rl_simulation(true_means, num_samples, behavior_policies, lcb_penalty_coeff=1.5):
     """
@@ -209,6 +210,12 @@ def _draw_lcb_plot(data):
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--mode', choices=['slides', 'animate'], default='slides')
+    args = parser.parse_args()
+
+    # TODO: Implement animate mode for overlay-based scripts
+
     # --- Configuration ---
     NUM_ARMS = 5
     NUM_SAMPLES = 300 

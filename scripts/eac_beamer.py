@@ -1,5 +1,6 @@
 import numpy as np
 import math
+import argparse
 
 def run_eac_simulation(num_arms, exploration_pulls, commitment_pulls, true_means):
     """
@@ -101,6 +102,27 @@ def generate_beamer_frames(history, num_arms):
         
     return latex_code
 
+def generate_animate_frames(history, num_arms):
+    """
+    Pass 2: Generate the LaTeX frames using the pre-computed simulation data for animate package.
+    """
+    latex_code = ""
+    plot_ymax = 1.5
+    frame_title = "Explore and Commit Algorithm"
+
+    latex_code += f"\\begin{{frame}}{{{frame_title}}}\n"
+    latex_code += r"\centering" + "\n"
+    latex_code += r"\begin{animateinline}[controls, loop]{2}" + "\n"
+
+    for i, state in enumerate(history):
+        latex_code += _draw_eac_plot(state, plot_ymax, num_arms)
+        if i < len(history) - 1:
+            latex_code += "\n\\newframe\n"
+
+    latex_code += "\n\\end{animateinline}\n"
+    latex_code += "\\end{frame}\n"
+    return latex_code
+
 def _draw_eac_plot(state, plot_ymax, num_arms):
     """
     Draws a single TikZ plot for a given state in the EAC simulation.
@@ -178,6 +200,10 @@ def _draw_eac_plot(state, plot_ymax, num_arms):
     return plot_code
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--mode', choices=['slides', 'animate'], default='slides')
+    args = parser.parse_args()
+
     # --- Parameters ---
     NUM_ARMS = 5
     EXPLORATION_PULLS = 20 # How many times each arm is pulled in Phase 1
@@ -190,7 +216,10 @@ if __name__ == '__main__':
     # 1. First Pass: Run simulation to get the history of states
     simulation_history = run_eac_simulation(NUM_ARMS, EXPLORATION_PULLS, COMMITMENT_PULLS, TRUE_MEANS)
 
-    # 2. Second Pass: Generate LaTeX frames from the history
-    beamer_frames = generate_beamer_frames(simulation_history, NUM_ARMS)
+    # 2. Second Pass: Generate LaTeX
+    if args.mode == 'animate':
+        output = generate_animate_frames(simulation_history, NUM_ARMS)
+    else:
+        output = generate_beamer_frames(simulation_history, NUM_ARMS)
     
-    print(beamer_frames)
+    print(output)

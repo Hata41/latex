@@ -1,5 +1,6 @@
 import random
 import sys
+import argparse
 from collections import deque
 import colorsys
 
@@ -212,10 +213,66 @@ class BeamerGenerator:
             frame_content += "  \\end{scope}\n" + self._draw_maze_walls() + self._draw_markers(paths_to_show[:i+1]) + frame_closer
             all_frames.append(f"\\begin{{frame}}{{Exploring Dead Ends ({i + 1}/{len(paths_to_show)})}}\n{frame_content}")
 
-        notice = "% IMPORTANT: Make sure your main .tex file includes:\n% \\usepackage{tikz}\n% \\usetikzlibrary{backgrounds}\n% \\usepackage{pifont}\n% \\usepackage{adjustbox}\n\n"
-        print(notice + "\n".join(all_frames))
+        return "\n".join(all_frames)
+
+    def generate_animate_frames(self, num_dead_ends_to_show=5):
+        sorted_dead_ends = sorted(self.dead_end_paths, key=len, reverse=True)
+        paths_to_show = sorted_dead_ends[:num_dead_ends_to_show]
+        color_definitions = self._generate_latex_color_definitions(len(paths_to_show))
+        
+        preamble_start = f"""
+\\begin{{frame}}{{The Generated Maze}}
+\\begin{{adjustbox}}{{width=0.95\\textwidth, height=0.85\\textheight, keepaspectratio, center}}
+\\begin{{animateinline}}[controls, loop]{{2}}
+{color_definitions}
+"""
+        
+        def frame_setup():
+            return f"    \\begin{{tikzpicture}}\n    \\path[use as bounding box] (0, 1) rectangle ({self.cols}, -{self.rows});\n"
+        
+        def frame_close():
+            return "    \\end{tikzpicture}"
+
+        frames = []
+        
+        # Frame 1: Pure Maze
+        f1 = frame_setup() + self._draw_maze_walls() + frame_close()
+        frames.append(f1)
+
+        # Frame 2: Solution
+        f2 = frame_setup()
+        f2 += "  \\begin{scope}[on background layer]\n"
+        f2 += self._draw_solution_path()
+        f2 += "  \\end{scope}\n" + self._draw_maze_walls() + self._draw_markers([])
+        f2 += frame_close()
+        frames.append(f2)
+
+        # Dead ends
+        for i in range(len(paths_to_show)):
+            f_de = frame_setup()
+            f_de += "  \\begin{scope}[on background layer]\n"
+            f_de += self._draw_solution_path()
+            occupied = set()
+            for j in range(i + 1):
+                unique_segments = self._split_unique_segments(paths_to_show[j], occupied)
+                f_de += self._draw_path_segments(unique_segments, f"deadendcolor{j}")
+                for seg in unique_segments:
+                    occupied.update(seg)
+            f_de += "  \\end{scope}\n" + self._draw_maze_walls() + self._draw_markers(paths_to_show[:i+1])
+            f_de += frame_close()
+            frames.append(f_de)
+
+        latex_code = preamble_start
+        latex_code += "\n\\newframe\n".join(frames)
+        latex_code += "\n\\end{animateinline}\n\\end{adjustbox}\n\\end{frame}\n"
+        
+        return latex_code
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--mode', choices=['slides', 'animate'], default='slides')
+    args = parser.parse_args()
+
     # --- Configuration ---
     WIDTH_CELLS = 80
     HEIGHT_CELLS = 50
@@ -230,4 +287,10 @@ if __name__ == '__main__':
     dead_ends = pathfinder.find_dead_ends()
     
     beamer_gen = BeamerGenerator(grid, solution_path, dead_ends)
-    beamer_gen.generate_frames(num_dead_ends_to_show=NUM_DEAD_ENDS_TO_SHOW)
+    
+    if args.mode == 'animate':
+        output = beamer_gen.generate_animate_frames(num_dead_ends_to_show=NUM_DEAD_ENDS_TO_SHOW)
+    else:
+        output = beamer_gen.generate_frames(num_dead_ends_to_show=NUM_DEAD_ENDS_TO_SHOW)
+        
+    print(output)

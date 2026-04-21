@@ -1,6 +1,7 @@
 
 import numpy as np
 import math
+import argparse
 
 def generate_random_arm_data(num_arms):
     """
@@ -120,6 +121,12 @@ def _draw_mab_problem_plot(arm_data):
     return plot_code
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--mode', choices=['slides', 'animate'], default='slides')
+    args = parser.parse_args()
+
+    # TODO: Implement animate mode for overlay-based scripts
+
     # --- Configuration ---
     # SET THE DESIRED NUMBER OF ARMS HERE
     NUM_ARMS = 4 

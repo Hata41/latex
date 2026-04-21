@@ -1,5 +1,6 @@
 import numpy as np
 import math
+import argparse
 
 def run_ucb_simulation(num_arms, num_steps, true_means):
     """
@@ -78,6 +79,7 @@ def generate_beamer_frames(history, max_ucb):
             frame_title = "UCB Algorithm"
             
         latex_code += f"\\begin{{frame}}{{{frame_title}}}\n"
+        latex_code += "\\centering\n"
         latex_code += _draw_ucb_plot(
             state,
             plot_ymax=plot_ymax,
@@ -85,6 +87,31 @@ def generate_beamer_frames(history, max_ucb):
         )
         latex_code += "\n\\end{frame}\n"
         
+    return latex_code
+
+def generate_animate_frames(history, max_ucb):
+    """
+    Pass 2: Generate the LaTeX frames using the pre-computed simulation data for animate package.
+    """
+    plot_ymax = math.ceil(max_ucb)
+    latex_code = ""
+    frame_title = "UCB Algorithm"
+
+    latex_code += f"\\begin{{frame}}{{{frame_title}}}\n"
+    latex_code += r"\centering" + "\n"
+    latex_code += r"\begin{animateinline}[controls, loop]{2}" + "\n"
+
+    for i, state in enumerate(history):
+        latex_code += _draw_ucb_plot(
+            state,
+            plot_ymax=plot_ymax,
+            num_arms=len(state['means'])
+        )
+        if i < len(history) - 1:
+            latex_code += "\n\\newframe\n"
+
+    latex_code += "\n\\end{animateinline}\n"
+    latex_code += "\\end{frame}\n"
     return latex_code
 
 def _draw_ucb_plot(state, plot_ymax, num_arms):
@@ -97,11 +124,10 @@ def _draw_ucb_plot(state, plot_ymax, num_arms):
     x_step = PLOT_WIDTH / (num_arms + 1)
 
     # --- CORRECTED CODE STARTS HERE ---
-    # Use the 'center' environment instead of the \centering command.
+    # Use the \centering command outside of this function if needed.
     # It provides better vertical spacing and is more robust for large blocks.
     # Also, added '%' to prevent spurious spaces.
     plot_code = r"""
-\begin{center}
 \resizebox{0.95\textwidth}{!}{%
 \begin{tikzpicture}[
     axis/.style={->, >=Stealth, thick},
@@ -154,11 +180,15 @@ def _draw_ucb_plot(state, plot_ymax, num_arms):
         """
         
     # --- CORRECTED CODE ENDS HERE ---
-    # Properly close the tikzpicture, resizebox, and the new center environment.
-    plot_code += "\n\\end{tikzpicture}%\n}\n\\end{center}" 
+    # Properly close the tikzpicture and resizebox.
+    plot_code += "\n\\end{tikzpicture}%\n}" 
     return plot_code
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--mode', choices=['slides', 'animate'], default='slides')
+    args = parser.parse_args()
+
     # --- Parameters ---
     NUM_ARMS = 6
     NUM_STEPS = 20 # Number of steps to animate *after* the initial pulls
@@ -170,7 +200,10 @@ if __name__ == '__main__':
     # 1. First Pass: Run simulation to get data and max value
     simulation_history, max_ucb = run_ucb_simulation(NUM_ARMS, NUM_STEPS, TRUE_MEANS)
 
-    # 2. Second Pass: Generate LaTeX frames with fixed axes
-    beamer_frames = generate_beamer_frames(simulation_history, max_ucb)
+    # 2. Second Pass: Generate LaTeX
+    if args.mode == 'animate':
+        output = generate_animate_frames(simulation_history, max_ucb)
+    else:
+        output = generate_beamer_frames(simulation_history, max_ucb)
     
-    print(beamer_frames)
+    print(output)
