@@ -1,5 +1,5 @@
 [project]
-name = "oleron-presentation"
+name = "latex"
 version = "0.1.0"
 description = "Beamer presentation with dynamic TikZ generation"
 authors = [

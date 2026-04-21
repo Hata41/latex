@@ -1,19 +1,19 @@
-# Makefile for Oleron Presentation
-LATEX_ENGINE = pdflatex -shell-escape
-MODE ?= slides
+PROJECTS = oleron linucb maze
 
-.PHONY: all compile sync clean
+all:
+	for dir in $(PROJECTS); do \
+		$(MAKE) -C $$dir; \
+	done
 
-all: compile
+animate:
+	$(MAKE) -C oleron animate
 
-compile: sync
-	$(LATEX_ENGINE) "\def\buildmode{$(MODE)}\input{beamer.tex}"
-	# Run twice for references/toc if needed
-	# $(LATEX_ENGINE) beamer.tex
+clean:
+	for dir in $(PROJECTS); do \
+		$(MAKE) -C $$dir clean; \
+	done
 
 sync:
 	uv sync
 
-clean:
-	rm -rf .venv
-	rm -f *.aux *.log *.nav *.out *.snm *.toc *.pdf
+.PHONY: all clean sync animate
